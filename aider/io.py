@@ -10,6 +10,7 @@ from io import StringIO
 from pathlib import Path
 import tempfile
 import subprocess
+from typing import Optional
 
 from prompt_toolkit.completion import Completer, Completion, ThreadedCompleter
 from prompt_toolkit.cursor_shapes import ModalCursorShapeConfig
