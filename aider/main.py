@@ -775,8 +775,6 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
                 if not args.architect:
                     args.architect = True
                     io.tool_output("Enabling architect mode for step-by-step planning")
-            else:
-                query = None  # No initial query for custom mode
             elif args.wut_custom:
                 query = None  # No initial query for custom mode
             else:
