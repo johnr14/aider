@@ -717,9 +717,12 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             if not args.wut_no_save:
                 wut_file = save_wut_buffer(context, git_root, io, args)
             
-            # If file was created, read it into chat
+            # If file was created, read it into chat using /read
             if wut_file:
                 args.message = f"/read {wut_file}"
+            else:
+                # Keep current behavior if no file was written
+                args.message = f"Explain and help fix this command output:\n\n{context}"
             
             # Process for file references if auto-file enabled
             if args.auto_file:
