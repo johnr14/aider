@@ -920,6 +920,45 @@ class InputOutput:
                 print(err)
                 self.chat_history_file = None  # Disable further attempts to write
 
+    def prompt_choice(self, prompt: str, choices: list[tuple[str, str]]) -> tuple[str, str]:
+        """Present a multiple choice prompt and return the selected choice."""
+        if not choices:
+            raise ValueError("No choices provided")
+            
+        # Display the prompt and choices
+        self.tool_output(prompt)
+        for i, (text, _) in enumerate(choices, 1):
+            self.tool_output(f"{i}. {text}")
+            
+        # Get user input
+        while True:
+            try:
+                selection = self.get_input(
+                    root="",
+                    rel_fnames=[],
+                    addable_rel_fnames=[],
+                    commands=None,
+                    edit_format=None
+                ).strip()
+                
+                if not selection:
+                    continue
+                    
+                # Try to parse as number
+                index = int(selection) - 1
+                if 0 <= index < len(choices):
+                    return choices[index]
+                    
+                # Try to match text
+                for choice in choices:
+                    if selection.lower() == choice[0].lower():
+                        return choice
+                        
+                self.tool_error(f"Invalid selection: {selection}")
+                
+            except ValueError:
+                self.tool_error("Please enter a number or the choice text")
+
     def format_files_for_input(self, rel_fnames, rel_read_only_fnames):
         if not self.pretty:
             read_only_files = []
