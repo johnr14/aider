@@ -1,4 +1,4 @@
-import argparse
+from argparse import ArgumentParser
 import configparser
 import json
 import os

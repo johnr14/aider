@@ -1,6 +1,6 @@
 # This code is imported/inspired by wut (https://github.com/shobrook/wut) 
 # from author Jonathan Shobrook
-import argparse
+from argparse import ArgumentParser
 import os
 import re
 import tempfile

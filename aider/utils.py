@@ -1,4 +1,4 @@
-import argparse
+from argparse import ArgumentParser
 import itertools
 import os
 import platform
