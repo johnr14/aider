@@ -20,7 +20,7 @@ from prompt_toolkit.enums import EditingMode
 
 from aider import __version__, models, urls, utils
 from aider.analytics import Analytics
-from aider.wut import get_wut_context, process_wut_output
+from aider.wut import get_wut_context, process_wut_output, Shell, Command
 from aider.args import get_parser
 from aider.coders import Coder
 from aider.coders.base_coder import UnknownEditFormat
