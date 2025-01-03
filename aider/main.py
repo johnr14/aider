@@ -713,7 +713,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             
             # Process for file references if auto-file enabled
             if args.auto_file:
-                file_refs = process_wut_output(context)
+                file_refs = process_wut_output(context, io)  # Pass io object
                 fnames.extend(file_refs)
                 if file_refs:
                     io.tool_output(f"Auto-added files: {', '.join(file_refs)}")

@@ -367,6 +367,41 @@ def check_pip_install_extra(io, module, prompt, pip_install_cmd, self_update=Fal
     print(printable_shell_command(cmd))
 
 
+def prompt_file_selection(file_refs, io):
+    """Prompt user to select files from a list with multiple selection options"""
+    if not file_refs:
+        return []
+
+    if len(file_refs) == 1:
+        return file_refs
+
+    io.tool_output("Found multiple files in error output:")
+    for i, fname in enumerate(file_refs, 1):
+        io.tool_output(f"{i}: {fname}")
+
+    io.tool_output("\nEnter which files to add (e.g. 1-3, 5, 7-9):")
+    selection = io.prompt()
+
+    selected_files = set()
+    for part in selection.split(','):
+        part = part.strip()
+        if '-' in part:
+            start, end = part.split('-')
+            try:
+                start = int(start.strip())
+                end = int(end.strip())
+                selected_files.update(range(start, end + 1))
+            except (ValueError, IndexError):
+                continue
+        else:
+            try:
+                selected_files.add(int(part.strip()))
+            except ValueError:
+                continue
+
+    return [file_refs[i-1] for i in sorted(selected_files) if 1 <= i <= len(file_refs)]
+
+
 def printable_shell_command(cmd_list):
     """
     Convert a list of command arguments to a properly shell-escaped string.

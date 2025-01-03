@@ -13,19 +13,18 @@ def get_wut_context() -> str:
     """Get terminal context for wut functionality"""
     return TerminalContext.get_context()
 
-def process_wut_output(output):
-    # Parse output for file references
-    file_refs = set()
-    # Add regex patterns to detect file references
-    patterns = [
-        r"File \"([^\"]+)\"",
-        r"in ([^\s]+\.py)",
-        r"([^\s]+\.\w+):\d+",
-    ]
-    for pattern in patterns:
-        matches = re.findall(pattern, output)
-        file_refs.update(matches)
-    return file_refs
+def process_wut_output(output, io=None):
+    """Process wut output for file references and prompt user to select files"""
+    file_refs = ErrorParser.parse_error_output(output)
+    
+    if not file_refs:
+        return []
+        
+    if io:
+        from aider.utils import prompt_file_selection
+        return prompt_file_selection(list(file_refs), io)
+        
+    return list(file_refs)
 # Constants
 MAX_CHARS = 10000
 MAX_COMMANDS = 3
