@@ -1,7 +1,11 @@
 import os
 import re
-from wut.wut import main as wut_main
-from wut.utils import get_terminal_context, get_shell
+import tempfile
+from collections import namedtuple
+from subprocess import check_output, run, CalledProcessError, DEVNULL
+from typing import List, Optional, Tuple, Set
+
+from psutil import Process
 
 def get_wut_context():
     if not (os.environ.get("TMUX") or os.environ.get("STY")):
