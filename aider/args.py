@@ -239,6 +239,11 @@ def get_parser(default_config_files, git_root):
         ),
     )
     group.add_argument(
+        "--architect",
+        action="store_true",
+        help="Use architect mode for structured planning and problem solving",
+    )
+    group.add_argument(
         "--editor-model",
         metavar="EDITOR_MODEL",
         default=None,
