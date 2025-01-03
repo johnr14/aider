@@ -731,8 +731,13 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             if wut_file:
                 read_only_fnames.append(wut_file)
                 io.tool_output(f"Added wut buffer to read-only files: {wut_file}")
-                # When using file, don't append buffer to context
-                args.message = "Explain and help fix this command output:"
+                # Handle custom question mode
+                if args.wut_custom:
+                    args.message = None  # Don't send any initial message
+                    io.tool_output("Wut buffer saved. You can now ask custom questions about it.")
+                else:
+                    # When using file, don't append buffer to context
+                    args.message = "Explain and help fix this command output:"
             else:
                 # Only append buffer to context if NOT saving to file
                 args.message = f"Explain and help fix this command output:\n\n{context}"
@@ -750,7 +755,8 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
                     ("Explain", "--question-ask"),
                     ("Fix", "--question-fix"), 
                     ("Detailed Explanation", "--question-explain"),
-                    ("Fix Plan", "--question-plan")
+                    ("Fix Plan", "--question-plan"),
+                    ("Custom Question", "--wut-custom")  # Add custom option
                 ]
                 # Show selection menu using io.prompt_choice()
                 choice = io.prompt_choice("Select question type:", questions)
@@ -769,6 +775,10 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
                 if not args.architect:
                     args.architect = True
                     io.tool_output("Enabling architect mode for step-by-step planning")
+            else:
+                query = None  # No initial query for custom mode
+            elif args.wut_custom:
+                query = None  # No initial query for custom mode
             else:
                 query = "Explain and help fix this command output:"
             
