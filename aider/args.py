@@ -638,6 +638,12 @@ def get_parser(default_config_files, git_root):
         help="Debug last terminal command output using LLM",
     )
     group.add_argument(
+        "--wut-previous",
+        action="store_true",
+        help="Include previous commands in wut context (default: only last command)",
+        default=False,
+    )
+    group.add_argument(
         "--edit-wut",
         action="store_true",
         help="Edit wut prompt in $EDITOR before sending to LLM",

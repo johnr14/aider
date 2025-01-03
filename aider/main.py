@@ -710,7 +710,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     # Handle wut functionality
     if args.wut:
         try:
-            context = get_wut_context()
+            context = get_wut_context(args)
             
             # Process for file references if auto-file enabled
             if args.auto_file:

@@ -10,9 +10,9 @@ from typing import List, Optional, Tuple, Set
 
 from psutil import Process
 
-def get_wut_context() -> str:
+def get_wut_context(args=None) -> str:
     """Get terminal context for wut functionality"""
-    return TerminalContext.get_context()
+    return TerminalContext.get_context(args)
 
 def process_wut_output(output, io=None):
     """Process wut output for file references and prompt user to select files"""
@@ -39,7 +39,7 @@ class TerminalContext:
     """Handles terminal context extraction and processing"""
     
     @staticmethod
-    def get_context() -> str:
+    def get_context(args=None) -> str:
         """Get terminal context including commands and output"""
         if not TerminalContext._is_terminal_multiplexer():
             raise ValueError(
@@ -47,7 +47,7 @@ class TerminalContext:
             )
         
         shell = ShellManager.get_shell()
-        return TerminalContext._build_terminal_context(shell)
+        return TerminalContext._build_terminal_context(shell, args)
 
     @staticmethod
     def _is_terminal_multiplexer() -> bool:
@@ -55,7 +55,7 @@ class TerminalContext:
         return bool(os.environ.get("TMUX") or os.environ.get("STY"))
 
     @staticmethod
-    def _build_terminal_context(shell: Shell) -> str:
+    def _build_terminal_context(shell: Shell, args=None) -> str:
         """Build terminal context string from shell output"""
         output = TerminalContext._get_pane_output()
         if not output:
@@ -69,22 +69,28 @@ class TerminalContext:
         commands = TerminalContext._truncate_commands(commands[:MAX_COMMANDS])
         commands = list(reversed(commands))  # Order: Oldest to newest
 
-        previous_commands = commands[:-1]
+        # Only include last command by default
         last_command = commands[-1]
-
         context = "<terminal_history>\n"
-        context += "<previous_commands>\n"
-        context += "\n".join(
-            TerminalContext._command_to_string(c, shell.prompt) 
-            for c in previous_commands
-        )
-        context += "\n</previous_commands>\n"
-        context += "\n<last_command>\n"
+        context += "<last_command>\n"
         context += TerminalContext._command_to_string(last_command, shell.prompt)
         context += "\n</last_command>"
         context += "\n</terminal_history>"
 
-        print(context)
+        # Add previous commands if --wut-previous is set
+        if args and args.wut_previous and len(commands) > 1:
+            previous_commands = commands[:-1]
+            context = "<terminal_history>\n"
+            context += "<previous_commands>\n"
+            context += "\n".join(
+                TerminalContext._command_to_string(c, shell.prompt) 
+                for c in previous_commands
+            )
+            context += "\n</previous_commands>\n"
+            context += "\n<last_command>\n"
+            context += TerminalContext._command_to_string(last_command, shell.prompt)
+            context += "\n</last_command>"
+            context += "\n</terminal_history>"
 
         return context
 
