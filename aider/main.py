@@ -712,6 +712,10 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         try:
             context = get_wut_context(args)
             
+            # Save wut buffer if git root exists
+            if git_root:
+                save_wut_buffer(context, git_root, io, args)
+            
             # Process for file references if auto-file enabled
             if args.auto_file:
                 file_refs = process_wut_output(context, io)  # Pass io object

@@ -14,6 +14,70 @@ def get_wut_context(args=None) -> str:
     """Get terminal context for wut functionality"""
     return TerminalContext.get_context(args)
 
+from datetime import datetime
+from pathlib import Path
+
+def save_wut_buffer(context: str, git_root: str, io, args=None) -> str:
+    """Save wut buffer to markdown file in git root"""
+    if not git_root:
+        io.tool_error("No git root found, cannot save wut buffer")
+        return None
+        
+    wut_file = Path(git_root) / ".aider.wut-buffer.md"
+    
+    if wut_file.exists():
+        if args and args.wut_append:
+            mode = "a"
+            action = "Appending to"
+        elif args and args.wut_rename:
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            backup = wut_file.with_name(f".aider.wut-buffer.{timestamp}.md")
+            wut_file.rename(backup)
+            mode = "w"
+            action = f"Saved new (renamed old to {backup.name})"
+        else:
+            choices = [
+                ("Overwrite", "o"),
+                ("Append", "a"), 
+                ("Rename old", "r"),
+                ("Cancel", "c")
+            ]
+            choice = io.prompt_choice(
+                f"Wut buffer file exists at {wut_file}. What would you like to do?",
+                choices
+            )
+            
+            if choice == "c":
+                return None
+            elif choice == "o":
+                mode = "w"
+                action = "Overwrote"
+            elif choice == "a":
+                mode = "a" 
+                action = "Appended to"
+            elif choice == "r":
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                backup = wut_file.with_name(f".aider.wut-buffer.{timestamp}.md")
+                wut_file.rename(backup)
+                mode = "w"
+                action = f"Saved new (renamed old to {backup.name})"
+    else:
+        mode = "w"
+        action = "Saved new"
+    
+    try:
+        with open(wut_file, mode, encoding="utf-8") as f:
+            if mode == "a":
+                f.write("\n\n---\n\n")
+            f.write(context)
+            
+        io.tool_output(f"{action} wut buffer at {wut_file}")
+        return str(wut_file)
+        
+    except Exception as e:
+        io.tool_error(f"Error saving wut buffer: {e}")
+        return None
+
 def process_wut_output(output, io=None):
     """Process wut output for file references and prompt user to select files"""
     file_refs = ErrorParser.parse_error_output(output)

@@ -644,6 +644,16 @@ def get_parser(default_config_files, git_root):
         default=False,
     )
     group.add_argument(
+        "--wut-append",
+        action="store_true",
+        help="Append to existing wut buffer file instead of overwriting",
+    )
+    group.add_argument(
+        "--wut-rename", 
+        action="store_true",
+        help="Rename existing wut buffer file before saving new one",
+    )
+    group.add_argument(
         "--edit-wut",
         action="store_true",
         help="Edit wut prompt in $EDITOR before sending to LLM",
