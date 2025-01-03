@@ -69,7 +69,7 @@ class TerminalContext:
         
         # Only truncate if not using --wut-previous
         if not (args and args.wut_previous):
-            commands = TerminalContext._truncate_commands(commands[-MAX_COMMANDS:])  # Get last N commands
+            commands = TerminalContext._tqruncate_commands(commands[-MAX_COMMANDS:])  # Get last N commands
         
         # Build context with all commands if --wut-previous is set
         if args and args.wut_previous:
