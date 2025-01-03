@@ -659,6 +659,11 @@ def get_parser(default_config_files, git_root):
         help="Disable saving wut buffer to disk",
     )
     group.add_argument(
+        "--wut-custom",
+        action="store_true",
+        help="Open chat with wut buffer file but let user type custom question",
+    )
+    group.add_argument(
         "--edit-wut",
         action="store_true",
         help="Edit wut prompt in $EDITOR before sending to LLM",
