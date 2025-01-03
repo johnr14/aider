@@ -311,11 +311,3 @@ class ErrorParser:
         return file_refs
 
 
-# Public API
-def get_wut_context() -> str:
-    """Get terminal context for wut functionality"""
-    return TerminalContext.get_context()
-
-def process_wut_output(output: str) -> set:
-    """Process wut output for file references"""
-    return ErrorParser.parse_error_output(output)
