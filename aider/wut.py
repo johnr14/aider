@@ -18,10 +18,21 @@ from datetime import datetime
 from pathlib import Path
 
 def save_wut_buffer(context: str, git_root: str, io, args=None) -> str:
-    """Save wut buffer to markdown file in git root"""
-    if not git_root:
-        io.tool_error("No git root found, cannot save wut buffer")
+    """Save wut buffer to markdown file"""
+    if args and args.wut_no_save:
+        io.tool_output("Skipping wut buffer save (--wut-no-save)")
         return None
+        
+    # Try to find git root if not provided
+    if not git_root:
+        try:
+            git_dir = check_output(["git", "rev-parse", "--git-dir"], 
+                                 stderr=DEVNULL, text=True).strip()
+            git_root = str(Path(git_dir).parent.resolve())
+            io.tool_output(f"Found git root at: {git_root}")
+        except CalledProcessError:
+            git_root = str(Path.cwd())
+            io.tool_output(f"No git repo found, saving to current directory: {git_root}")
         
     wut_file = Path(git_root) / ".aider.wut-buffer.md"
     

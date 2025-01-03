@@ -654,6 +654,11 @@ def get_parser(default_config_files, git_root):
         help="Rename existing wut buffer file before saving new one",
     )
     group.add_argument(
+        "--wut-no-save",
+        action="store_true",
+        help="Disable saving wut buffer to disk",
+    )
+    group.add_argument(
         "--edit-wut",
         action="store_true",
         help="Edit wut prompt in $EDITOR before sending to LLM",
