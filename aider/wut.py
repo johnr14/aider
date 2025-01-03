@@ -7,14 +7,9 @@ from typing import List, Optional, Tuple, Set
 
 from psutil import Process
 
-def get_wut_context():
-    if not (os.environ.get("TMUX") or os.environ.get("STY")):
-        raise ValueError(
-            "wut must be run inside a tmux or screen session to access terminal history"
-        )
-    
-    shell = get_shell()
-    return get_terminal_context(shell)
+def get_wut_context() -> str:
+    """Get terminal context for wut functionality"""
+    return TerminalContext.get_context()
 
 def process_wut_output(output):
     # Parse output for file references
