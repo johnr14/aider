@@ -739,6 +739,11 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
                 query = "Explain in detail what happened with this command:"
             elif args.question_plan:
                 query = "Create a step-by-step plan to fix this issue:"
+                # Enable architect mode if not already set
+                if not args.architect and args.edit_format != "architect":
+                    args.architect = True
+                    args.edit_format = "architect"
+                    io.tool_output("Enabling architect mode for step-by-step planning")
             else:
                 query = "Explain and help fix this command output:"
             
