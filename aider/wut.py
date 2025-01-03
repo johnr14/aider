@@ -23,10 +23,6 @@ def save_wut_buffer(context: str, git_root: str, io, args=None) -> Optional[str]
         io.tool_output("Skipping wut buffer save (--wut-no-save)")
         return None
         
-    # Return None if user chose to cancel
-    if mode is None:
-        return None
-        
     # Try to find git root if not provided
     if not git_root:
         try:
@@ -84,7 +80,7 @@ def save_wut_buffer(context: str, git_root: str, io, args=None) -> Optional[str]
         mode = "w"
         action = "Saved new"
     
-    # Check if mode was set
+    # If mode wasn't set (user chose to cancel), return None
     if mode is None:
         return None
         
