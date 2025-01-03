@@ -8,6 +8,8 @@ from dataclasses import dataclass
 from datetime import datetime
 from io import StringIO
 from pathlib import Path
+import tempfile
+import subprocess
 
 from prompt_toolkit.completion import Completer, Completion, ThreadedCompleter
 from prompt_toolkit.cursor_shapes import ModalCursorShapeConfig
@@ -873,6 +875,29 @@ class InputOutput:
             self.tool_output(
                 "Multiline mode: Disabled. Alt-Enter inserts newline, Enter submits text"
             )
+
+    def edit_text(self, initial_content: str) -> Optional[str]:
+        """Edit text in $EDITOR and return the edited content."""
+        editor = os.environ.get("EDITOR", "vim")
+        
+        with tempfile.NamedTemporaryFile(mode="w+", suffix=".txt") as temp_file:
+            try:
+                # Write initial content to temp file
+                temp_file.write(initial_content)
+                temp_file.flush()
+                
+                # Open editor
+                subprocess.run([editor, temp_file.name], check=True)
+                
+                # Read back edited content
+                temp_file.seek(0)
+                return temp_file.read()
+            except subprocess.CalledProcessError as e:
+                self.tool_error(f"Error editing text: {e}")
+                return None
+            except Exception as e:
+                self.tool_error(f"Error editing text: {e}")
+                return None
 
     def append_chat_history(self, text, linebreak=False, blockquote=False, strip=True):
         if blockquote:
