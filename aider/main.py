@@ -20,6 +20,7 @@ from prompt_toolkit.enums import EditingMode
 
 from aider import __version__, models, urls, utils
 from aider.analytics import Analytics
+from aider.wut import get_wut_context, process_wut_output
 from aider.args import get_parser
 from aider.coders import Coder
 from aider.coders.base_coder import UnknownEditFormat
@@ -704,6 +705,56 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     if args.verbose:
         show = format_settings(parser, args)
         io.tool_output(show)
+
+    # Handle wut functionality
+    if args.wut:
+        try:
+            context = get_wut_context()
+            
+            # Process for file references if auto-file enabled
+            if args.auto_file:
+                file_refs = process_wut_output(context)
+                fnames.extend(file_refs)
+                if file_refs:
+                    io.tool_output(f"Auto-added files: {', '.join(file_refs)}")
+            
+            # Handle question selection
+            if args.question_select:
+                questions = [
+                    ("Explain", "--question-ask"),
+                    ("Fix", "--question-fix"), 
+                    ("Detailed Explanation", "--question-explain"),
+                    ("Fix Plan", "--question-plan")
+                ]
+                # Show selection menu using io.prompt_choice()
+                choice = io.prompt_choice("Select question type:", questions)
+                setattr(args, choice[1], True)
+            
+            # Build initial prompt based on selected question type
+            if args.question_ask:
+                query = "Explain what went wrong with this command and output:"
+            elif args.question_fix:
+                query = "Fix this command and explain what was wrong:"
+            elif args.question_explain:
+                query = "Explain in detail what happened with this command:"
+            elif args.question_plan:
+                query = "Create a step-by-step plan to fix this issue:"
+            else:
+                query = "Explain and help fix this command output:"
+            
+            # Handle edit mode
+            if args.edit_wut:
+                initial_content = f"{query}\n\n{context}"
+                edited = io.edit_text(initial_content)
+                if edited:
+                    query, context = edited.split("\n\n", 1)
+            
+            # Set up coder with wut context
+            args.message = f"{query}\n\n{context}"
+            
+        except ValueError as e:
+            io.tool_error(str(e))
+            return 1
 
     cmd_line = " ".join(sys.argv)
     cmd_line = scrub_sensitive_info(args, cmd_line)

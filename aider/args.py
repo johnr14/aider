@@ -635,6 +635,46 @@ def get_parser(default_config_files, git_root):
     ##########
     group = parser.add_argument_group("Modes")
     group.add_argument(
+        "--wut",
+        action="store_true",
+        help="Debug last terminal command output using LLM",
+    )
+    group.add_argument(
+        "--edit-wut",
+        action="store_true",
+        help="Edit wut prompt in $EDITOR before sending to LLM",
+    )
+    group.add_argument(
+        "--auto-file",
+        action="store_true",
+        help="Automatically add files mentioned in error logs",
+    )
+    group.add_argument(
+        "--question-select",
+        action="store_true",
+        help="Show question selection menu for debugging",
+    )
+    group.add_argument(
+        "--question-ask",
+        action="store_true",
+        help="Ask LLM to explain the error",
+    )
+    group.add_argument(
+        "--question-fix",
+        action="store_true",
+        help="Ask LLM to fix the error",
+    )
+    group.add_argument(
+        "--question-explain",
+        action="store_true",
+        help="Ask LLM to explain the error in detail",
+    )
+    group.add_argument(
+        "--question-plan",
+        action="store_true",
+        help="Ask LLM to create a plan to fix the error",
+    )
+    group.add_argument(
         "--message",
         "--msg",
         "-m",
