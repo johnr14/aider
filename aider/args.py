@@ -224,10 +224,8 @@ def get_parser(default_config_files, git_root):
     )
     group.add_argument(
         "--architect",
-        action="store_const",
-        dest="edit_format",
-        const="architect",
-        help="Use architect edit format for the main chat",
+        action="store_true",
+        help="Use architect mode for structured planning and problem solving",
     )
     group.add_argument(
         "--weak-model",

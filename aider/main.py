@@ -740,7 +740,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             elif args.question_plan:
                 query = "Create a step-by-step plan to fix this issue:"
                 # Enable architect mode if not already set
-                if not hasattr(args, 'architect') or not args.architect:
+                if not args.architect:
                     args.architect = True
                     args.edit_format = "architect"
                     io.tool_output("Enabling architect mode for step-by-step planning")
