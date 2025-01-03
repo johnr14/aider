@@ -712,18 +712,30 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         try:
             context = get_wut_context(args)
             
-            # Save wut buffer unless disabled
+            # Handle edit mode before saving
+            if args.edit_wut:
+                initial_content = f"Explain and help fix this command output:\n\n{context}"
+                edited = io.edit_text(initial_content)
+                if edited:
+                    query, context = edited.split("\n\n", 1)
+                    args.message = f"{query}\n\n{context}"
+                else:
+                    args.message = f"Explain and help fix this command output:\n\n{context}"
+            
+            # Save wut buffer unless disabled (after any edits)
             wut_file = None
             if not args.wut_no_save:
                 wut_file = save_wut_buffer(context, git_root, io, args)
-            
-            # If file was created, add it to read-only files like --read does
+                
+            # If file was created, add it to read_only_fnames like --read does
             if wut_file:
                 read_only_fnames.append(wut_file)
                 io.tool_output(f"Added wut buffer to read-only files: {wut_file}")
-            
-            # Set up the initial prompt
-            args.message = "Explain and help fix this command output:"
+                # When using file, don't append buffer to context
+                args.message = "Explain and help fix this command output:"
+            else:
+                # Only append buffer to context if NOT saving to file
+                args.message = f"Explain and help fix this command output:\n\n{context}"
             
             # Process for file references if auto-file enabled
             if args.auto_file:
@@ -759,16 +771,6 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
                     io.tool_output("Enabling architect mode for step-by-step planning")
             else:
                 query = "Explain and help fix this command output:"
-            
-            # Handle edit mode
-            if args.edit_wut:
-                initial_content = f"{query}\n\n{context}"
-                edited = io.edit_text(initial_content)
-                if edited:
-                    query, context = edited.split("\n\n", 1)
-            
-            # Set up coder with wut context
-            args.message = f"{query}\n\n{context}"
             
         except ValueError as e:
             io.tool_error(str(e))
