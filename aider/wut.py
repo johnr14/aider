@@ -84,6 +84,8 @@ class TerminalContext:
         context += "\n</last_command>"
         context += "\n</terminal_history>"
 
+        print(context)
+
         return context
 
     @staticmethod
