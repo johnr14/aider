@@ -33,8 +33,12 @@ def save_wut_buffer(context: str, git_root: str, io, args=None) -> Optional[str]
         except CalledProcessError:
             git_root = str(Path.cwd())
             io.tool_output(f"No git repo found, saving to current directory: {git_root}")
-        
+
     wut_file = Path(git_root) / ".aider.wut-buffer.md"
+    
+    # Initialize mode and action variables
+    mode = None
+    action = None
     
     if wut_file.exists():
         if args and args.wut_append:
@@ -76,6 +80,10 @@ def save_wut_buffer(context: str, git_root: str, io, args=None) -> Optional[str]
         mode = "w"
         action = "Saved new"
     
+    # Check if mode was set
+    if mode is None:
+        return None
+        
     try:
         with open(wut_file, mode, encoding="utf-8") as f:
             if mode == "a":
