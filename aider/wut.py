@@ -69,10 +69,8 @@ class TerminalContext:
         
         # Only truncate if not using --wut-previous
         if not (args and args.wut_previous):
-            commands = TerminalContext._truncate_commands(commands[:MAX_COMMANDS])
+            commands = TerminalContext._truncate_commands(commands[-MAX_COMMANDS:])  # Get last N commands
         
-        commands = list(reversed(commands))  # Order: Oldest to newest
-
         # Build context with all commands if --wut-previous is set
         if args and args.wut_previous:
             context = "<terminal_history>\n"
@@ -80,11 +78,11 @@ class TerminalContext:
                 context += "<previous_commands>\n"
                 context += "\n".join(
                     TerminalContext._command_to_string(c, shell.prompt) 
-                    for c in commands[:-1]
+                    for c in commands[:-1]  # All commands except last
                 )
                 context += "\n</previous_commands>\n"
             context += "<last_command>\n"
-            context += TerminalContext._command_to_string(commands[-1], shell.prompt)
+            context += TerminalContext._command_to_string(commands[-1], shell.prompt)  # Last command
             context += "\n</last_command>\n"
             context += "</terminal_history>"
             return context
@@ -130,21 +128,34 @@ class TerminalContext:
     @staticmethod
     def _get_commands(pane_output: str, shell: Shell) -> List[Command]:
         """Extract commands from pane output"""
-        commands = []  # Order: newest to oldest
+        commands = []  # Order: oldest to newest
         buffer = []
         
-        for line in reversed(pane_output.splitlines()):
+        # Process lines in normal order (oldest to newest)
+        for line in pane_output.splitlines():
             if not line.strip():
                 continue
 
             if shell.prompt.lower() in line.lower():
-                command_text = line.split(shell.prompt, 1)[1].strip()
-                command = Command(command_text, "\n".join(reversed(buffer)).strip())
-                commands.append(command)
-                buffer = []
+                # When we hit a prompt, finalize the previous command
+                if buffer:
+                    # The buffer contains the output of the previous command
+                    command_text = buffer[-1].split(shell.prompt, 1)[1].strip()
+                    command_output = "\n".join(buffer[:-1]).strip()
+                    commands.append(Command(command_text, command_output))
+                    buffer = []
+                
+                # Start new command
+                buffer.append(line)
                 continue
 
             buffer.append(line)
+
+        # Handle the last command
+        if buffer:
+            command_text = buffer[-1].split(shell.prompt, 1)[1].strip()
+            command_output = "\n".join(buffer[:-1]).strip()
+            commands.append(Command(command_text, command_output))
 
         return commands[1:]  # Exclude the wut command itself
 
