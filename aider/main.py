@@ -713,8 +713,13 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             context = get_wut_context(args)
             
             # Save wut buffer unless disabled
+            wut_file = None
             if not args.wut_no_save:
-                save_wut_buffer(context, git_root, io, args)
+                wut_file = save_wut_buffer(context, git_root, io, args)
+            
+            # If file was created, read it into chat
+            if wut_file:
+                args.message = f"/read {wut_file}"
             
             # Process for file references if auto-file enabled
             if args.auto_file:

@@ -17,8 +17,8 @@ def get_wut_context(args=None) -> str:
 from datetime import datetime
 from pathlib import Path
 
-def save_wut_buffer(context: str, git_root: str, io, args=None) -> str:
-    """Save wut buffer to markdown file"""
+def save_wut_buffer(context: str, git_root: str, io, args=None) -> Optional[str]:
+    """Save wut buffer to markdown file and return path if created"""
     if args and args.wut_no_save:
         io.tool_output("Skipping wut buffer save (--wut-no-save)")
         return None
