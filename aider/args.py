@@ -223,11 +223,6 @@ def get_parser(default_config_files, git_root):
         help="Specify what edit format the LLM should use (default depends on model)",
     )
     group.add_argument(
-        "--architect",
-        action="store_true",
-        help="Use architect mode for structured planning and problem solving",
-    )
-    group.add_argument(
         "--weak-model",
         metavar="WEAK_MODEL",
         default=None,
