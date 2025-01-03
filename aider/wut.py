@@ -57,11 +57,13 @@ class TerminalContext:
     @staticmethod
     def _build_terminal_context(shell: Shell, args=None) -> str:
         """Build terminal context string from shell output"""
+        print(f"Building context with shell: {shell}")  # Debug
         output = TerminalContext._get_pane_output()
         if not output:
             return "<terminal_history>No terminal output found.</terminal_history>"
 
         if not shell.prompt:
+            print("No shell prompt detected, using fallback")  # Debug
             output = TerminalContext._truncate_pane_output(output)
             return f"<terminal_history>\n{output}\n</terminal_history>"
 
@@ -219,7 +221,9 @@ class ShellManager:
     def get_shell() -> Shell:
         """Get shell information"""
         name, path = ShellManager._get_shell_name_and_path()
+        print(f"Detected shell: name={name}, path={path}")  # Debug
         prompt = ShellManager._get_shell_prompt(name, path)
+        print(f"Detected prompt: {prompt}")  # Debug
         return Shell(path, name, prompt)
 
     @staticmethod
@@ -268,6 +272,7 @@ class ShellManager:
         """Get shell prompt string"""
         shell_prompt = None
         try:
+            print(f"Attempting to get prompt for {shell_name} at {shell_path}")  # Debug
             if shell_name == "zsh":
                 cmd = [shell_path, "-c", "print -P $PS1"]
                 shell_prompt = check_output(cmd, text=True, stderr=DEVNULL)
@@ -285,7 +290,8 @@ class ShellManager:
             elif shell_name in ["pwsh", "powershell"]:
                 cmd = [shell_path, "-c", "Write-Host $prompt"]
                 shell_prompt = check_output(cmd, text=True, stderr=DEVNULL)
-        except Exception:
+        except Exception as e:
+            print(f"Error getting prompt: {e}")  # Debug
             shell_prompt = None
 
         return shell_prompt.strip() if shell_prompt else None
