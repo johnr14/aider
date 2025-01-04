@@ -61,18 +61,19 @@ def save_wut_buffer(context: str, git_root: str, io, args=None) -> Optional[str]
                 f"Wut buffer file exists at {wut_file}. What would you like to do?",
                 choices
             )
-
-            print(choice)
             
-            if choice == "c":
+            # Get the actual choice value from the tuple
+            choice_value = choice[1]
+            
+            if choice_value == "c":
                 return None
-            elif choice == "o":
+            elif choice_value == "o":
                 mode = "w"
                 action = "Overwrote"
-            elif choice == "a":
+            elif choice_value == "a":
                 mode = "a" 
                 action = "Appended to"
-            elif choice == "r":
+            elif choice_value == "r":
                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                 backup = wut_file.with_name(f".aider.wut-buffer.{timestamp}.md")
                 wut_file.rename(backup)
