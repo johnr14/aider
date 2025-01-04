@@ -809,6 +809,7 @@ def run_test_real(
             coder.apply_updates()
         else:
             response = coder.run(with_message=instructions, preproc=False)
+
         dur += time.time() - start
 
         if not no_aider:
@@ -851,6 +852,34 @@ def run_test_real(
         errors = "\n".join(errors)
         instructions = errors
         instructions += prompts.test_failures.format(file_list=file_list)
+
+    # Clean up build directories after all attempts
+    # Rust target/debug
+    target_dir = testdir / "target" / "debug"
+    if target_dir.exists():
+        try:
+            shutil.rmtree(target_dir)
+            print(f"Cleaned up Rust target/debug directory: {target_dir}")
+        except Exception as e:
+            print(f"Failed to clean up Rust target/debug directory: {e}")
+
+    # Java build directories
+    java_build_dir = testdir / "build"
+    if java_build_dir.exists():
+        try:
+            shutil.rmtree(java_build_dir)
+            print(f"Cleaned up Java build directory: {java_build_dir}")
+        except Exception as e:
+            print(f"Failed to clean up Java build directory: {e}")
+
+    # Node.js node_modules directories
+    node_modules_dir = testdir / "node_modules"
+    if node_modules_dir.exists():
+        try:
+            shutil.rmtree(node_modules_dir)
+            print(f"Cleaned up Node.js node_modules directory: {node_modules_dir}")
+        except Exception as e:
+            print(f"Failed to clean up Node.js node_modules directory: {e}")
 
     results = dict(
         testdir=str(testdir),
