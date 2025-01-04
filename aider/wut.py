@@ -61,6 +61,8 @@ def save_wut_buffer(context: str, git_root: str, io, args=None) -> Optional[str]
                 f"Wut buffer file exists at {wut_file}. What would you like to do?",
                 choices
             )
+
+            print(choice)
             
             if choice == "c":
                 return None
@@ -81,6 +83,7 @@ def save_wut_buffer(context: str, git_root: str, io, args=None) -> Optional[str]
         action = "Saved new"
     
     # If mode wasn't set (user chose to cancel), return None
+    print(mode)
     if mode is None:
         return None
         
