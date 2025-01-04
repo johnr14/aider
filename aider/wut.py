@@ -153,6 +153,10 @@ class TerminalContext:
 
         commands = TerminalContext._get_commands(output, shell)
         
+        if not commands:
+            output = TerminalContext._truncate_pane_output(output)
+            return f"<terminal_history>\n{output}\n</terminal_history>"
+            
         if not (args and args.wut_previous):
             commands = commands[-MAX_COMMANDS:]  # Get last N commands
         
@@ -230,7 +234,8 @@ class TerminalContext:
                             if len(parts) > 1:
                                 command_text = parts[1].strip()
                                 command_output = "\n".join(buffer[:-1]).strip()
-                                commands.append(Command(command_text, command_output))
+                                if command_text or command_output:  # Only add if we have content
+                                    commands.append(Command(command_text, command_output))
                         buffer = []
                     except IndexError:
                         # Skip malformed command
@@ -251,10 +256,17 @@ class TerminalContext:
                     if len(parts) > 1:
                         command_text = parts[1].strip()
                         command_output = "\n".join(buffer[:-1]).strip()
-                        commands.append(Command(command_text, command_output))
+                        if command_text or command_output:  # Only add if we have content
+                            commands.append(Command(command_text, command_output))
             except IndexError:
                 # Skip malformed command
                 pass
+
+        # If we didn't find any commands with prompts, return the raw output as a single command
+        if not commands:
+            output = "\n".join(buffer).strip()
+            if output:
+                commands.append(Command("", output))
 
         return commands[1:] if len(commands) > 1 else commands  # Exclude the wut command itself if present
 
