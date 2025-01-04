@@ -219,15 +219,23 @@ class TerminalContext:
             if not line.strip():
                 continue
 
-            if shell.prompt.lower() in line.lower():
+            if shell.prompt and shell.prompt.lower() in line.lower():
                 # When we hit a prompt, finalize the previous command
                 if buffer:
-                    # The buffer contains the output of the previous command
-                    command_text = buffer[-1].split(shell.prompt, 1)[1].strip()
-                    command_output = "\n".join(buffer[:-1]).strip()
-                    commands.append(Command(command_text, command_output))
-                    buffer = []
-                
+                    try:
+                        # The buffer contains the output of the previous command
+                        last_line = buffer[-1]
+                        if shell.prompt in last_line:
+                            parts = last_line.split(shell.prompt, 1)
+                            if len(parts) > 1:
+                                command_text = parts[1].strip()
+                                command_output = "\n".join(buffer[:-1]).strip()
+                                commands.append(Command(command_text, command_output))
+                        buffer = []
+                    except IndexError:
+                        # Skip malformed command
+                        buffer = []
+                    
                 # Start new command
                 buffer.append(line)
                 continue
@@ -236,11 +244,19 @@ class TerminalContext:
 
         # Handle the last command
         if buffer:
-            command_text = buffer[-1].split(shell.prompt, 1)[1].strip()
-            command_output = "\n".join(buffer[:-1]).strip()
-            commands.append(Command(command_text, command_output))
+            try:
+                last_line = buffer[-1]
+                if shell.prompt and shell.prompt in last_line:
+                    parts = last_line.split(shell.prompt, 1)
+                    if len(parts) > 1:
+                        command_text = parts[1].strip()
+                        command_output = "\n".join(buffer[:-1]).strip()
+                        commands.append(Command(command_text, command_output))
+            except IndexError:
+                # Skip malformed command
+                pass
 
-        return commands[1:]  # Exclude the wut command itself
+        return commands[1:] if len(commands) > 1 else commands  # Exclude the wut command itself if present
 
     @staticmethod
     def _truncate_commands(commands: List[Command]) -> List[Command]:
