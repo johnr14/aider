@@ -722,26 +722,25 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
                 else:
                     args.message = f"Explain and help fix this command output:\n\n{context}"
             
-            # Save wut buffer unless disabled (after any edits)
+            # Save wut buffer unless disabled
             wut_file = None
             if not args.wut_no_save:
                 wut_file = save_wut_buffer(context, git_root, io, args)
                 
-            # If file was created, add it to read_only_fnames like --read does
             if wut_file:
+                # Add to read_only_fnames instead of including in context
                 read_only_fnames.append(wut_file)
                 io.tool_output(f"Added wut buffer to read-only files: {wut_file}")
-                # Handle custom question mode
+                
                 if args.wut_custom:
                     args.message = None  # Don't send any initial message
                     io.tool_output("Wut buffer saved. You can now ask custom questions about it.")
                 else:
-                    # When using file, don't append buffer to context
                     args.message = "Explain and help fix this command output:"
             else:
-                # Only append buffer to context if NOT saving to file
+                # Only use context directly if not saving to file
                 args.message = f"Explain and help fix this command output:\n\n{context}"
-            
+                
             # Process for file references if auto-file enabled
             if args.auto_file:
                 file_refs = process_wut_output(context, io)  # Pass io object
@@ -756,9 +755,8 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
                     ("Fix", "--question-fix"), 
                     ("Detailed Explanation", "--question-explain"),
                     ("Fix Plan", "--question-plan"),
-                    ("Custom Question", "--wut-custom")  # Add custom option
+                    ("Custom Question", "--wut-custom")
                 ]
-                # Show selection menu using io.prompt_choice()
                 choice = io.prompt_choice("Select question type:", questions)
                 setattr(args, choice[1], True)
             
@@ -771,12 +769,11 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
                 query = "Explain in detail what happened with this command:"
             elif args.question_plan:
                 query = "Create a step-by-step plan to fix this issue:"
-                # Enable architect mode if not already set
                 if not args.architect:
                     args.architect = True
                     io.tool_output("Enabling architect mode for step-by-step planning")
             elif args.wut_custom:
-                query = None  # No initial query for custom mode
+                query = None
             else:
                 query = "Explain and help fix this command output:"
             

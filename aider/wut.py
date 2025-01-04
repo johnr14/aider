@@ -140,46 +140,46 @@ class TerminalContext:
     @staticmethod
     def _build_terminal_context(shell: Shell, args=None) -> str:
         """Build terminal context string from shell output"""
-        print(f"Building context with shell: {shell}")  # Debug
-        output = TerminalContext._get_pane_output()
-        if not output:
-            return "<terminal_history>No terminal output found.</terminal_history>"
+        if args and args.wut_no_save:
+            # Only build context if we're not saving to file
+            output = TerminalContext._get_pane_output()
+            if not output:
+                return "<terminal_history>No terminal output found.</terminal_history>"
 
-        if not shell.prompt:
-            print("No shell prompt detected, using fallback")  # Debug
-            output = TerminalContext._truncate_pane_output(output)
-            return f"<terminal_history>\n{output}\n</terminal_history>"
+            if not shell.prompt:
+                output = TerminalContext._truncate_pane_output(output)
+                return f"<terminal_history>\n{output}\n</terminal_history>"
 
-        commands = TerminalContext._get_commands(output, shell)
-        
-        # Only truncate if not using --wut-previous
-        if not (args and args.wut_previous):
-            commands = TerminalContext._tqruncate_commands(commands[-MAX_COMMANDS:])  # Get last N commands
-        
-        # Build context with all commands if --wut-previous is set
-        if args and args.wut_previous:
+            commands = TerminalContext._get_commands(output, shell)
+            
+            if not (args and args.wut_previous):
+                commands = commands[-MAX_COMMANDS:]  # Get last N commands
+            
+            if args and args.wut_previous:
+                context = "<terminal_history>\n"
+                if len(commands) > 1:
+                    context += "<previous_commands>\n"
+                    context += "\n".join(
+                        TerminalContext._command_to_string(c, shell.prompt) 
+                        for c in commands[:-1]
+                    )
+                    context += "\n</previous_commands>\n"
+                context += "<last_command>\n"
+                context += TerminalContext._command_to_string(commands[-1], shell.prompt)
+                context += "\n</last_command>\n"
+                context += "</terminal_history>"
+                return context
+
+            last_command = commands[-1]
             context = "<terminal_history>\n"
-            if len(commands) > 1:
-                context += "<previous_commands>\n"
-                context += "\n".join(
-                    TerminalContext._command_to_string(c, shell.prompt) 
-                    for c in commands[:-1]  # All commands except last
-                )
-                context += "\n</previous_commands>\n"
             context += "<last_command>\n"
-            context += TerminalContext._command_to_string(commands[-1], shell.prompt)  # Last command
-            context += "\n</last_command>\n"
-            context += "</terminal_history>"
+            context += TerminalContext._command_to_string(last_command, shell.prompt)
+            context += "\n</last_command>"
+            context += "\n</terminal_history>"
             return context
-
-        # Default behavior - only last command
-        last_command = commands[-1]
-        context = "<terminal_history>\n"
-        context += "<last_command>\n"
-        context += TerminalContext._command_to_string(last_command, shell.prompt)
-        context += "\n</last_command>"
-        context += "\n</terminal_history>"
-        return context
+        
+        # When saving to file, return minimal context
+        return "<terminal_history>Command output saved to file</terminal_history>"
 
     @staticmethod
     def _get_pane_output() -> str:
