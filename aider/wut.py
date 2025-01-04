@@ -219,8 +219,14 @@ class TerminalContext:
         commands = []  # Order: oldest to newest
         buffer = []
         
-        # Process lines in normal order (oldest to newest)
-        for line in pane_output.splitlines():
+        # Split output into lines and reverse to process newest first
+        lines = pane_output.splitlines()
+        lines.reverse()
+        
+        # Track if we've seen the wut command
+        seen_wut = False
+        
+        for line in lines:
             if not line.strip():
                 continue
 
@@ -234,8 +240,13 @@ class TerminalContext:
                             parts = last_line.split(shell.prompt, 1)
                             if len(parts) > 1:
                                 command_text = parts[1].strip()
-                                command_output = "\n".join(buffer[:-1]).strip()
+                                command_output = "\n".join(reversed(buffer[:-1])).strip()
                                 if command_text or command_output:  # Only add if we have content
+                                    # Skip the wut command itself
+                                    if not seen_wut and "wut" in command_text.lower():
+                                        seen_wut = True
+                                        buffer = []
+                                        continue
                                     commands.append(Command(command_text, command_output))
                         buffer = []
                     except IndexError:
@@ -248,7 +259,7 @@ class TerminalContext:
 
             buffer.append(line)
 
-        # Handle the last command
+        # Handle the last command if buffer has content
         if buffer:
             try:
                 last_line = buffer[-1]
@@ -256,20 +267,21 @@ class TerminalContext:
                     parts = last_line.split(shell.prompt, 1)
                     if len(parts) > 1:
                         command_text = parts[1].strip()
-                        command_output = "\n".join(buffer[:-1]).strip()
+                        command_output = "\n".join(reversed(buffer[:-1])).strip()
                         if command_text or command_output:  # Only add if we have content
-                            commands.append(Command(command_text, command_output))
+                            # Skip the wut command itself
+                            if not seen_wut and "wut" in command_text.lower():
+                                seen_wut = True
+                            else:
+                                commands.append(Command(command_text, command_output))
             except IndexError:
                 # Skip malformed command
                 pass
 
-        # If we didn't find any commands with prompts, return the raw output as a single command
-        if not commands:
-            output = "\n".join(buffer).strip()
-            if output:
-                commands.append(Command("", output))
-
-        return commands[1:] if len(commands) > 1 else commands  # Exclude the wut command itself if present
+        # Reverse commands to put them in chronological order
+        commands.reverse()
+        
+        return commands
 
     @staticmethod
     def _truncate_commands(commands: List[Command]) -> List[Command]:
