@@ -175,13 +175,14 @@ class TerminalContext:
             context += "</terminal_history>"
             return context
 
-        last_command = commands[-1]
-        context = "<terminal_history>\n"
-        context += "<last_command>\n"
-        context += TerminalContext._command_to_string(last_command, shell.prompt)
-        context += "\n</last_command>"
-        context += "\n</terminal_history>"
-        return context
+        else:
+            last_command = commands[-1]
+            context = "<terminal_history>\n"
+            context += "<last_command>\n"
+            context += TerminalContext._command_to_string(last_command, shell.prompt)
+            context += "\n</last_command>"
+            context += "\n</terminal_history>"
+            return context
 
     @staticmethod
     def _get_pane_output() -> str:

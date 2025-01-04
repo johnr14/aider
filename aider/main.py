@@ -714,12 +714,14 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             
             # Handle edit mode before saving
             if args.edit_wut:
+                # Fix Question here !
                 initial_content = f"Explain and help fix this command output:\n\n{context}"
                 edited = io.edit_text(initial_content)
                 if edited:
                     query, context = edited.split("\n\n", 1)
                     args.message = f"{query}\n\n{context}"
                 else:
+                    # Fix Question and here !
                     args.message = f"Explain and help fix this command output:\n\n{context}"
             
             # Save wut buffer unless disabled
