@@ -363,8 +363,12 @@ class ShellManager:
                 if shell_prompt.strip() == '"${PS1@P}"':
                     return None
             elif shell_name == "fish":
-                cmd = [shell_path, "fish_prompt"]
+                # Try to get prompt from fish config
+                cmd = [shell_path, "-c", "functions -q fish_prompt; and echo $fish_prompt"]
                 shell_prompt = check_output(cmd, text=True, stderr=DEVNULL)
+                if not shell_prompt.strip():
+                    # Fallback to default fish prompt
+                    shell_prompt = "> "
             elif shell_name in ["csh", "tcsh"]:
                 cmd = [shell_path, "-c", "echo $prompt"]
                 shell_prompt = check_output(cmd, text=True, stderr=DEVNULL)
