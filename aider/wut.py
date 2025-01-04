@@ -84,7 +84,6 @@ def save_wut_buffer(context: str, git_root: str, io, args=None) -> Optional[str]
         action = "Saved new"
     
     # If mode wasn't set (user chose to cancel), return None
-    print(mode)
     if mode is None:
         return None
         
